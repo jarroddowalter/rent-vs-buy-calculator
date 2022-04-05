@@ -1,11 +1,13 @@
 import type { NextPage } from "next";
+import { useState } from "react";
 import Head from "next/head";
-import { Container, Title, Space, TextInput, Grid, Text, Group, NumberInput, Popover } from "@mantine/core";
+import { Container, Title, Space, TextInput, Grid, Text, Group, NumberInput, SegmentedControl } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { useMediaQuery } from "@mantine/hooks";
 import InfoIcon from "../components/InfoIcon";
 
 const Home: NextPage = () => {
+	const [incomeNet, setIncomeNet] = useState("gross");
 	const breakMobile = useMediaQuery("(max-width: 480px)");
 
 	return (
@@ -19,7 +21,57 @@ const Home: NextPage = () => {
 				<Grid>
 					<Grid.Col sm={12} md={4}>
 						<Title order={1}>Income</Title>
-						<TextInput placeholder='Input Text' label='Annual Gross Income' />
+						<NumberInput
+							hideControls
+							label={
+								<div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+									<div style={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
+										{incomeNet == "gross" ? "Annual Gross Income" : "Annual Net Income"}
+										<InfoIcon content='InfoIcon.'></InfoIcon>
+									</div>
+									<div style={{ width: "auto" }}>
+										<SegmentedControl
+											data={[
+												{ label: "GROSS", value: "gross" },
+												{ label: "NET", value: "net" },
+											]}
+											size={"xs"}
+											value={incomeNet}
+											onChange={setIncomeNet}
+										/>
+									</div>
+								</div>
+							}
+							size={breakMobile ? "xs" : "sm"}
+							icon={<Text size={breakMobile ? "xs" : "sm"}>$</Text>}
+							defaultValue={50000}
+							parser={(value) => value?.replace(/\$\s?|(,*)/g, "")}
+							formatter={(value) => (!Number.isNaN(parseFloat(value)) ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "")}
+							min={0}
+							precision={2}
+							onFocus={(value) => {
+								console.log("onFocus");
+							}}
+						/>
+						<NumberInput
+							hideControls
+							label={
+								<>
+									{"Annual Income Tax Rate"}
+									<InfoIcon content='InfoIcon.'></InfoIcon>
+								</>
+							}
+							size={breakMobile ? "xs" : "sm"}
+							defaultValue={23}
+							rightSection={
+								<Text size={breakMobile ? "xs" : "sm"} className={"mantine-NumberInput-icon"}>
+									%
+								</Text>
+							}
+							min={0}
+							max={100}
+							precision={2}
+						/>
 						<TextInput placeholder='Input Text' label='Annual Income Tax Rate' />
 						<TextInput placeholder='Input Text' label='Annual Gross Income Growth Rate' />
 						<TextInput placeholder='Input Text' label='Annual Non-Housing Expenses' />
@@ -32,7 +84,7 @@ const Home: NextPage = () => {
 							label={
 								<>
 									{"Estimated Stay Duration in Years"}
-									<InfoIcon content='This is an example of a popover on an InfoIcon.'></InfoIcon>
+									<InfoIcon content='InfoIcon.'></InfoIcon>
 								</>
 							}
 							size={breakMobile ? "xs" : "sm"}
@@ -53,6 +105,7 @@ const Home: NextPage = () => {
 							label='Payments per Year'
 							size={breakMobile ? "xs" : "sm"}
 							defaultValue={12}
+							onBlur={(value) => (value ? value : (value = "12"))}
 							min={1}
 							max={365}
 							precision={0}
